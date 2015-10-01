@@ -54,7 +54,7 @@ FirebaseServer.prototype = {
 		}
 
 		function pushRefData(path, ref) {
-			pushData(path, ref.getData());
+			pushData(path, ref.getSnapshot().exportVal());
 		}
 
 		function permissionDenied(requestId) {

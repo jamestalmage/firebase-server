@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "lodash": "^3.10.1",
-    "mockfirebase": "^0.11.0",
+    "mockfirebase": "jamestalmage/mockfirebase#get-snapshot",
     "targaryen": "^1.1.4",
     "ws": "0.7.2"
   }
