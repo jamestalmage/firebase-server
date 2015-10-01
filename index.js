@@ -53,6 +53,10 @@ FirebaseServer.prototype = {
 			send({d: {a: 'd', b: {p: path, d: data, t: null}}, t: 'd'});
 		}
 
+		function pushRefData(path, ref) {
+			pushData(path, ref.getData());
+		}
+
 		function permissionDenied(requestId) {
 			send({d: {r: requestId, b: {s: 'permission_denied', d: 'Permission denied'}}, t: 'd'});
 		}
@@ -72,12 +76,12 @@ FirebaseServer.prototype = {
 
 			var currentData = fbRef.getData();
 			if ((typeof currentData !== 'undefined') && (currentData !== null)) {
-				pushData(path, fbRef.getData());
+				pushRefData(path, fbRef);
 			}
 			send({d: {r: requestId, b: {s: 'ok', d: {}}}, t: 'd'});
 			fbRef.on('value', function (snap) {
 				if (snap.val()) {
-					pushData(path, fbRef.getData());
+					pushRefData(path, fbRef);
 				}
 			});
 		}
@@ -118,7 +122,7 @@ FirebaseServer.prototype = {
 			if (typeof hash !== 'undefined') {
 				var calculatedHash = firebaseHash(fbRef.getData());
 				if (hash !== calculatedHash) {
-					pushData(path, fbRef.getData());
+					pushRefData(path, fbRef);
 					send({d: {r: requestId, b: {s: 'datastale', d: 'Transaction hash does not match'}}, t: 'd'});
 					return;
 				}
@@ -126,7 +130,7 @@ FirebaseServer.prototype = {
 
 			fbRef.set(newData, function () {
 				// TODO check for failure
-				pushData(path, fbRef.getData());
+				pushRefData(path, fbRef);
 				send({d: {r: requestId, b: {s: 'ok', d: {}}}, t: 'd'});
 			});
 		}
