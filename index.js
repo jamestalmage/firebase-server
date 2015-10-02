@@ -13,7 +13,7 @@ var Ruleset = require('targaryen/lib/ruleset');
 var RuleDataSnapshot = require('targaryen/lib/rule-data-snapshot');
 var firebaseHash = require('./lib/firebaseHash');
 
-var loggingEnabled = false;
+var loggingEnabled = true;
 
 function _log(message) {
 	if (loggingEnabled) {
@@ -80,6 +80,7 @@ FirebaseServer.prototype = {
 			}
 			send({d: {r: requestId, b: {s: 'ok', d: {}}}, t: 'd'});
 			fbRef.on('value', function (snap) {
+				console.log('value changed', snap.exportVal());
 				if (snap.val()) {
 					pushRefData(path, fbRef);
 				}
@@ -108,6 +109,23 @@ FirebaseServer.prototype = {
 
 		function handleSet(requestId, path, fbRef, newData, hash) {
 			_log('Client set ' + path);
+
+			var isPriorityPath = /\/?\.priority$/.test(path);
+
+			if (isPriorityPath) {
+				path = path.replace( /\/?\.priority$/, '');
+				fbRef = fbRef.parent();
+				var newPriority = newData;
+				newData = fbRef.getData();
+				if (_.isObject(newData)) {
+					newData['.priority'] = newPriority;
+				} else {
+					newData = {
+						'.value': newData,
+						'.priority': newPriority
+					};
+				}
+			}
 
 			if (server._ruleset) {
 				var dataSnap = new RuleDataSnapshot(RuleDataSnapshot.convert(fbRef.root().getData()));
